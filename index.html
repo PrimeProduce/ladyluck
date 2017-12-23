@@ -1,0 +1,224 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<link href='https://fonts.googleapis.com/css?family=Fredoka+One|Source+Sans+Pro:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.0.5/vue.min.js"></script>
+
+<script>
+$(function() {
+    //JAVASCRIPT HERE
+});
+</script>
+
+<!-- 
+///////////////
+CSS
+///////////////
+ -->
+
+<style type="text/css">
+body {
+  font-family: 'Source Sans Pro', 'Helvetica', 'Arial', sans-serif;
+    margin: 0px;
+    padding: 0px;
+    height: 100%;
+}
+.bodycontainer {
+  display: block;
+    padding: 30px;
+}
+
+#raffle_container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+
+}
+.footer    {
+    color:grey;
+}
+
+.info    {
+    text-align: center;
+}
+.header    {
+    display:block;
+}
+h3    {
+    font-weight:normal;
+}
+h2    {
+    font-weight:normal;
+    font-size:11pt;
+}
+h1
+    {
+    font-size:20pt;
+    color:#293b92;
+    margin:0px 0px -18px 0px;    
+}
+.header a:link, .header a:visited    {
+    color:#000000;
+    text-decoration:none;
+}
+.header a:hover    {
+    color:#e16d20;
+    text-decoration:none;
+}
+
+.raffleitem {
+    display: block;
+    margin: 0px 10px 10px 0px;
+    padding: 10px;
+    width: 350px;
+    text-align: center;
+    font-size: 0.9em;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+.raffle_image {
+    max-height: 200px;
+    height: auto;
+}
+.raffle_itemname    {
+    font-family: 'Fredoka One';
+    font-size: 1.2em;
+    margin: 5px 0px;
+}
+.raffle_description {
+    margin: 5px 0px;
+}
+
+.raffle_winningticket .data {
+    font-family: 'Fredoka One';
+    font-size: 2em;
+    font-weight: bold;
+}
+
+.raffle_winningperson .data {
+    font-family: 'Fredoka One';
+    font-size: 2em;
+    font-weight: bold;
+}
+
+.raffle_claimed {
+  background-color: #73bdf1;
+}
+
+.raffle_chosen {
+  background-color: #FDDD9A;
+}
+
+.raffle_unchosen {
+    background-color: #f0f0f0;
+}
+
+
+</style>
+
+<!-- 
+///////////////
+HTML
+///////////////
+ -->
+
+<title>UnLocal Benefit Art Auction 2017</title>
+</head>
+
+
+<body>
+
+
+<div class="bodycontainer">
+
+
+  <div class="header">
+    <h1> Lady Luck</h1>
+    <h3>Raffle Items</h3>
+
+    <p>Some things to note: Try changing fields in Airtable, or adding a record.</p>
+    <p>Don't edit any of the airtable field names, or the table names!</p>
+    <p>There are three classes applied to each raffle item based on whether it's not yet picked (unchosen), chosen but unclaimed ('chosen'), and claimed ('claimed'). Right now they're set to change colors.</p>
+  </div>
+
+
+  <div id="raffle_container">
+      <div class="raffleitem" v-for="record in records" v-bind:class="raffleClasses(record)" >
+        <div class="raffle_images" v-for="attachment in record.fields.Attachments">
+          <a v-if="record.fields['Artwork Link']" v-bind:href="record.fields['Artwork Link']" target="_blank" >
+             <img class="raffle_image" v-bind:src="attachment.thumbnails.large.url" /> 
+          </a>
+          <a v-else v-bind:href="attachment.thumbnails.large.url" target="_blank">
+             <img class="raffle_image" v-bind:src="attachment.thumbnails.large.url" /> 
+         </a>
+        </div>
+        <div class="info">
+          <div class="raffle_itemname">{{ record.fields['Item Name'] }}</div>
+          <div class="raffle_description">{{ record.fields['Description'] }}</div>
+          <div v-if="record.fields['Winning Ticket #']" class="raffle_winningticket">
+            <b>Winning Raffle #: </b><div class="data">{{ record.fields['Winning Ticket #'] }}</div>
+          </div>
+          <div v-if="record.fields['Winning Person']" class="raffle_winningperson">
+            <b>Winning Person: </b><div class="data">{{ record.fields['Winning Person'] }}</div>
+          </div>
+        </div>
+      </div>
+  </div>
+
+
+
+  <div class="footer">
+    <h2>Organized by:</h2>
+    Person Person
+  </div>
+
+
+</div>
+
+<script>
+var apiURL = "https://api.airtable.com/v0/appf9lO5ZuD2e9KW2/Raffle%20Items?api_key=keyoQpvlH7D3w9kIB&view=Items%20Display";
+app = new Vue({
+  el: '#raffle_container',
+  data: {
+    records: null,
+    timer: null
+  },
+  created: function () {
+    this.fetchData();
+    this.timer = setInterval(this.fetchData, 30 * 1000)
+  },
+  beforeDestroy: function() {
+    clearInterval(this.timer)
+  },
+  methods: {
+    raffleClasses: function(record) {
+      console.log(record);
+			return {
+				"raffle_claimed": record.fields['Winning Person'],
+				"raffle_chosen": !(record.fields['Winning Person']) && record.fields['Winning Ticket #'],
+				"raffle_unchosen": !(record.fields['Winning Person']) && !(record.fields['Winning Ticket #'])
+			}
+    },
+    fetchData: function () {
+      var xhr = new XMLHttpRequest()
+      var self = this
+      xhr.open('GET', apiURL)
+      xhr.onload = function () {
+        self.records = JSON.parse(xhr.responseText).records
+        console.log("Fetched data.");
+      }
+      xhr.send()
+    }
+  }
+})
+</script>
+
+
+
+</body>
+</html>
