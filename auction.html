@@ -144,18 +144,14 @@ HTML
     <p>Some things to note: Try changing fields in Airtable, or adding a record.</p>
     <p>Don't edit any of the airtable field names, or the table names!</p>
     <p>There are three classes applied to each raffle item based on whether it's not yet picked (unchosen), chosen but unclaimed ('chosen'), and claimed ('claimed'). Right now they're set to change colors.</p>
+    <p>Everything is kind of styled but not quite-  assuming that Jerone or someone will change everything!</p>
   </div>
 
 
   <div id="raffle_container">
       <div class="raffleitem" v-for="record in records" v-bind:class="raffleClasses(record)" >
         <div class="raffle_images" v-for="attachment in record.fields.Attachments">
-          <a v-if="record.fields['Artwork Link']" v-bind:href="record.fields['Artwork Link']" target="_blank" >
-             <img class="raffle_image" v-bind:src="attachment.thumbnails.large.url" /> 
-          </a>
-          <a v-else v-bind:href="attachment.thumbnails.large.url" target="_blank">
-             <img class="raffle_image" v-bind:src="attachment.thumbnails.large.url" /> 
-         </a>
+           <img class="raffle_image" v-bind:src="attachment.thumbnails.large.url" /> 
         </div>
         <div class="info">
           <div class="raffle_itemname">{{ record.fields['Item Name'] }}</div>
