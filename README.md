@@ -1,4 +1,4 @@
-# silent_airtable_auction
+# airtable_Raffle
 
 Single page Vue.js app running off of Airtable's API.
 Refreshes every 30 secs.
